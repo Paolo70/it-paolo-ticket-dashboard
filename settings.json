@@ -1,0 +1,11 @@
+{
+  "language": "it",
+  "dateFormat": "dmy",
+  "numberFormat": "eu",
+  "timezone": "rome",
+  "theme": "light",
+  "notifications": {
+    "email": true,
+    "statusChange": true
+  }
+}

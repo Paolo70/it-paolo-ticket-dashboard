@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - IT Support</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .login-card {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .brand-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
+            background-color: #f9fafb;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            background-color: #fff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.875rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .error-message {
+            background-color: #fef2f2;
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-top: 1.5rem;
+            display: none;
+            border: 1px solid #fee2e2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <span class="brand-icon">🛡️</span>
+        <h1>Benvenuto</h1>
+        <p class="subtitle">Accedi al portale di supporto IT</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="es. Mario Rossi" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit">Accedi</button>
+            
+            <div id="errorMsg" class="error-message">
+                Credenziali non valide. Riprova.
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Se l'utente è già loggato, vai direttamente alla dashboard
+        if (localStorage.getItem('user')) {
+            window.location.href = 'index.html';
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Funzione per generare l'hash SHA-256
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            // 1. Calcola l'hash sia per username che per password
+            const usernameHash = await sha256(username);
+            const passwordHash = await sha256(password);
+
+            try {
+                // 2. Carica il "Database" utenti
+                const response = await fetch('users.json');
+                if (!response.ok) throw new Error('Impossibile caricare users.json');
+                const users = await response.json();
+
+                // 3. Cerca l'utente tramite HASH (nessun dato in chiaro viene confrontato)
+                const user = users.find(u => u.usernameHash === usernameHash);
+
+                // Debug: Mostra l'hash calcolato per facilitare la configurazione iniziale
+                console.log(`Tentativo login per: ${username}`);
+                console.log(`Username Hash: ${usernameHash}`);
+                console.log(`Password Hash: ${passwordHash}`);
+
+                if (!user) {
+                    throw new Error('Utente non trovato');
+                }
+
+                // 4. Verifica Hash
+                if (user.passwordHash === passwordHash) {
+                // Simuliamo salvataggio sessione
+                localStorage.setItem('user', user.displayName); // Usiamo il nome reale dal DB
+                
+                // Redirect alla Dashboard
+                window.location.href = 'index.html';
+                } else {
+                    throw new Error('Password errata');
+                }
+            } catch (error) {
+                console.warn(error.message);
+                // Mostra errore
+                errorMsg.style.display = 'block';
+                errorMsg.textContent = "Credenziali non valide.";
+                
+                // Nascondi errore dopo 3 secondi
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

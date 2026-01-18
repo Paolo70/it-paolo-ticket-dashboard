@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Ticket Dashboard</title>
+    <!-- Collegamento al file CSS -->
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // SECURITY CHECK: Se non c'è un utente salvato, reindirizza al login
+        if (!localStorage.getItem('user')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="brand">
+            <span>🛡️ IT Support</span>
+        </div>
+        <ul class="menu">
+            <li class="menu-item"><a href="#" id="navDashboard" class="menu-link active" data-i18n="dashboard">Dashboard</a></li>
+            <li class="menu-item"><a href="#" class="menu-link" data-i18n="allTickets">Tutti i Ticket</a></li>
+            <li class="menu-item"><a href="#" class="menu-link" data-i18n="myTickets">Assegnati a me</a></li>
+            <li class="menu-item"><a href="#" class="menu-link" data-i18n="users">Utenti</a></li>
+            <li class="menu-item"><a href="#" id="navSettings" class="menu-link" data-i18n="settings">Impostazioni</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header">
+            <h1 data-i18n="headerTitle">Dashboard Ticket</h1>
+            <div class="user-profile" id="userProfileTrigger">
+                <span>Mario Rossi</span>
+                <div class="avatar">MR</div>
+                <div class="dropdown-menu hidden" id="userDropdown">
+                    <a href="#" class="dropdown-item" data-i18n="menuAccount">Account</a>
+                    <a href="#" class="dropdown-item" data-i18n="menuProfile">Profilo</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item text-danger" id="btnLogout" data-i18n="menuLogout">Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- VISTA LISTA -->
+        <div id="listView">
+            <!-- Controls -->
+            <div class="controls-bar">
+                <div class="filters">
+                    <label for="statusFilter" class="filter-label" data-i18n="filterLabel">Filtra per stato:</label>
+                    <select id="statusFilter">
+                        <option value="all" data-i18n="optAll">Tutti gli stati</option>
+                        <option value="Aperto">Aperto</option>
+                        <option value="In Corso">In Corso</option>
+                        <option value="Chiuso">Chiuso</option>
+                    </select>
+                </div>
+                <button class="btn-primary" id="btnNewTicket">
+                    <span>+</span> <span data-i18n="newTicket">Nuovo Ticket</span>
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-sort="id" data-i18n="colId">ID</th>
+                            <th data-sort="title" data-i18n="colTitle">Titolo Ticket</th>
+                            <th data-sort="requester" data-i18n="colRequester">Richiedente</th>
+                            <th data-sort="status" data-i18n="colStatus">Stato</th>
+                            <th data-sort="priority" data-i18n="colPriority">Priorità</th>
+                            <th data-sort="date" data-i18n="colDate">Data</th>
+                            <th data-sort="progress" data-i18n="colProgress">Avanzamento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketTableBody">
+                        <!-- Le righe verranno popolate via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VISTA DETTAGLIO (Nascosta di default) -->
+        <div id="detailView" class="hidden">
+            <button class="btn-back" id="btnBack" data-i18n="backToList">← Torna alla lista</button>
+            
+            <div class="detail-header-row">
+                <h2 id="detailTitle">Titolo del Ticket</h2>
+                <span id="detailId" class="badge-id">#ID</span>
+                <button class="btn-primary" id="btnSave" style="margin-left: auto;">💾 <span data-i18n="saveChanges">Salva Modifiche</span></button>
+            </div>
+
+            <div class="detail-grid">
+                <!-- Colonna Principale -->
+                <div class="detail-card main-card">
+                    <div class="form-group">
+                        <label for="detailDesc" data-i18n="descLabel">Descrizione</label>
+                        <textarea id="detailDesc" rows="8" placeholder="Descrizione dettagliata del problema..." data-i18n-placeholder="descPlaceholder"></textarea>
+                    </div>
+                </div>
+
+                <!-- Colonna Laterale -->
+                <div class="detail-card side-card">
+                    <div class="form-group">
+                        <label for="detailStatus" data-i18n="statusLabel">Stato</label>
+                        <select id="detailStatus">
+                            <option value="Aperto">Aperto</option>
+                            <option value="In Corso">In Corso</option>
+                            <option value="Chiuso">Chiuso</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="detailPriority" data-i18n="priorityLabel">Priorità</label>
+                        <select id="detailPriority">
+                            <option value="Alta">Alta</option>
+                            <option value="Media">Media</option>
+                            <option value="Bassa">Bassa</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detailProgress" data-i18n="progressLabel">Avanzamento</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="range" id="detailProgress" min="0" max="100" step="5" style="flex: 1;">
+                            <span id="detailProgressValue" style="font-weight: bold; min-width: 35px; text-align: right;">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detailAssigned" data-i18n="assignedLabel">Assegnato a</label>
+                        <input type="text" id="detailAssigned" placeholder="Nome tecnico">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detailRequester" data-i18n="requesterLabel">Richiedente</label>
+                        <input type="text" id="detailRequester" readonly class="input-readonly">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detailDate" data-i18n="dateLabel">Data Creazione</label>
+                        <input type="text" id="detailDate" readonly class="input-readonly">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA IMPOSTAZIONI (Nascosta di default) -->
+        <div id="settingsView" class="hidden">
+            <header class="header" style="margin-bottom: 2rem;">
+                <h1 data-i18n="settingsHeader">Impostazioni Sistema</h1>
+            </header>
+            
+            <div class="detail-card" style="max-width: 900px;">
+                
+                <h3 class="settings-section-title" data-i18n="locSection">Localizzazione & Formati</h3>
+                <div class="detail-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label for="setLang" data-i18n="langLabel">Lingua Interfaccia</label>
+                        <select id="setLang">
+                            <option value="it" data-i18n="optLangIt">Italiano</option>
+                            <option value="en" data-i18n="optLangEn">Inglese (English)</option>
+                            <option value="es" data-i18n="optLangEs">Spagnolo (Español)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="setDate" data-i18n="dateFmtLabel">Formato Data</label>
+                        <select id="setDate">
+                            <option value="dmy">GG/MM/AAAA (31/12/2023)</option>
+                            <option value="mdy">MM/GG/AAAA (12/31/2023)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="setNum" data-i18n="numFmtLabel">Formato Numerico</label>
+                        <select id="setNum">
+                            <option value="eu">1.000,00 (Standard EU)</option>
+                            <option value="us">1,000.00 (Standard US)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="setTimezone" data-i18n="timezoneLabel">Fuso Orario</label>
+                        <select id="setTimezone">
+                            <option value="rome">Europe/Rome (GMT+1)</option>
+                            <option value="london">Europe/London (GMT+0)</option>
+                            <option value="ny">America/New_York (GMT-5)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 class="settings-section-title" data-i18n="prefSection">Preferenze & Notifiche</h3>
+                <div class="detail-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label for="setTheme" data-i18n="themeLabel">Tema</label>
+                        <select id="setTheme">
+                            <option value="light">Chiaro</option>
+                            <option value="dark">Scuro</option>
+                            <option value="auto">Automatico (Sistema)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="display: flex; flex-direction: column; gap: 0.8rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="notifEmail" checked style="width: auto;">
+                        <label for="notifEmail" style="margin: 0; font-weight: normal; cursor: pointer;" data-i18n="notifEmail">Invia email quando mi viene assegnato un ticket</label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="notifStatus" checked style="width: auto;">
+                        <label for="notifStatus" style="margin: 0; font-weight: normal; cursor: pointer;" data-i18n="notifStatus">Invia email quando cambia lo stato di un mio ticket</label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <button class="btn-primary" id="btnSaveSettings">💾 <span data-i18n="saveSettings">Salva Impostazioni</span></button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Collegamento al file JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

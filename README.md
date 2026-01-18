@@ -16,5 +16,10 @@ L'intero ciclo di vita del progetto, dalla configurazione alla documentazione, �
 * **Deploy:** Pubblicazione del sito su GitHub effettuata tramite guida AI.
 * **Documentazione:** Anche la formattazione di questo file `README.md` è stata realizzata chiedendo aiuto a **Gemini**.
 
+## 🔑 Credenziali di Test
+Per testare la funzionalità di login simulato, è possibile utilizzare le seguenti credenziali:
+* **Utente:** `mariorossi`
+* **Password:** `iononsonomariorossi`
+
 ## ℹ️ Note Tecniche
 * **Login Simulato:** Il progetto include una funzionalità di login. A puro scopo illustrativo e di test, l'autenticazione è gestita tramite un file `.json` che funge da database, simulando un accesso sicuro senza l'utilizzo di un database reale.

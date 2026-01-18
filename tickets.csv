@@ -1,6 +1,6 @@
 id,title,requester,status,priority,date,assignedTo,description,progress
 "TKT-1001","Errore connessione VPN","Luigi Verdi","Aperto","Alta","10-24-23","Mario Rossi","L'utente non riesce a stabilire una connessione VPN da remoto. Errore 619 visualizzato sul client.","0"
-"TKT-1002","Richiesta nuovo monitor","Anna Bianchi","In Corso","Media","10-23-23","Luca Blu","Richiesta per un secondo monitor 24 pollici per attività di sviluppo.","70"
+"TKT-1002","Richiesta nuovo monitor","Anna Bianchi","In Corso","Media","10-23-23","Luca Blu","Richiesta per un secondo monitor 24 pollici per attività di sviluppo.","35"
 "TKT-1003","Password scaduta","Marco Neri","Chiuso","Bassa","10-22-23","Mario Rossi","Reset password dominio richiesto dall'utente.","100"
 "TKT-1004","Stampante piano 2 inceppata","Giulia Gialli","Aperto","Media","10-24-23","","La stampante HP Laserjet segnala inceppamento carta nel vassoio 2.","0"
 "TKT-1005","Aggiornamento software contabilità","Admin","In Corso","Alta","10-20-23","Sara Neri","Pianificare aggiornamento server contabilità alla versione 2024.","30"
